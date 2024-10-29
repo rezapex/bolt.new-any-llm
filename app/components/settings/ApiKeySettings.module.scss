@@ -1,10 +1,13 @@
 .container {
   padding: 1rem;
+  background: var(--bolt-elements-background-depth-2);
+  color: var(--bolt-elements-textPrimary);
 
   h3 {
     margin: 0 0 1rem;
     font-size: 1.2rem;
     font-weight: 600;
+    color: var(--bolt-elements-textPrimary);
   }
 }
 
@@ -22,19 +25,30 @@
   label {
     font-size: 0.9rem;
     font-weight: 500;
+    color: var(--bolt-elements-textSecondary);
   }
 
   input {
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background: var(--input-background);
-    color: var(--text-color);
+    padding: 0.75rem;
+    border: 1px solid var(--bolt-elements-borderColor);
+    border-radius: 6px;
+    background: var(--bolt-elements-background-depth-1);
+    color: var(--bolt-elements-textPrimary);
     font-size: 0.9rem;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: var(--bolt-elements-textTertiary);
+    }
 
     &:focus {
       outline: none;
-      border-color: var(--primary-color);
+      border-color: var(--bolt-elements-primary);
+      box-shadow: 0 0 0 2px var(--bolt-elements-primary-alpha);
+    }
+
+    &:hover:not(:focus) {
+      border-color: var(--bolt-elements-borderColorHover);
     }
   }
 }

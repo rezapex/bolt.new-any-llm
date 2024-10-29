@@ -37,11 +37,17 @@ async function chatAction({ request }: ActionFunctionArgs) {
     };
 
     // validate that at least one API key is provided
-    const hasValidKey = Object.values(env).some((key) => key && key !== '');
+    const hasValidKey = Object.entries(env).some(([key, value]) => {
+      // Skip Ollama URL validation as it's optional
+      if (key === 'OLLAMA_API_BASE_URL') return false;
+      return value && value.trim() !== '';
+    });
 
     if (!hasValidKey) {
       return new Response(
-        JSON.stringify({ error: 'No valid API key provided. Please provide at least one API key.' }),
+        JSON.stringify({
+          error: 'No valid API key provided. Please provide at least one API key in the settings.',
+        }),
         {
           status: 400,
           headers: {
@@ -86,11 +92,16 @@ async function chatAction({ request }: ActionFunctionArgs) {
     });
   } catch (error) {
     console.error('Chat error:', error);
-    return new Response(JSON.stringify({ error: 'An error occurred while processing your request' }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
+    return new Response(
+      JSON.stringify({
+        error: 'An error occurred while processing your request. Please check your API keys and try again.',
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
   }
 }
