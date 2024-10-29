@@ -1,20 +1,32 @@
 .container {
-  padding: 1rem;
-  background: var(--bolt-elements-background-depth-2);
-  color: var(--bolt-elements-textPrimary);
+  padding: 1.5rem;
+  background: var(--ah-dialog-background);
+  color: var(--ah-text-primary);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px var(--ah-shadow);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 
   h3 {
-    margin: 0 0 1rem;
+    margin: 0 0 1.5rem;
     font-size: 1.2rem;
     font-weight: 600;
-    color: var(--bolt-elements-textPrimary);
+    color: var(--ah-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .icon {
+      color: var(--ah-text-secondary);
+      font-size: 1.4rem;
+    }
   }
 }
 
 .fields {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
   margin-bottom: 1.5rem;
 }
 
@@ -26,30 +38,30 @@
   label {
     font-size: 0.9rem;
     font-weight: 500;
-    color: var(--bolt-elements-textSecondary);
+    color: var(--ah-text-secondary);
   }
 
   input {
     padding: 0.75rem;
-    border: 1px solid var(--bolt-elements-borderColor);
+    border: 1px solid var(--ah-border-color);
     border-radius: 6px;
-    background: var(--bolt-elements-background-depth-1);
-    color: var(--bolt-elements-textPrimary);
+    background: var(--ah-background-depth-1);
+    color: var(--ah-text-primary);
     font-size: 0.9rem;
     transition: all 0.2s ease;
 
     &::placeholder {
-      color: var(--bolt-elements-textTertiary);
+      color: var(--ah-text-tertiary);
     }
 
     &:focus {
       outline: none;
-      border-color: var(--bolt-elements-primary);
-      box-shadow: 0 0 0 2px var(--bolt-elements-primary-alpha);
+      border-color: var(--ah-primary);
+      box-shadow: 0 0 0 2px var(--ah-primary-alpha);
     }
 
     &:hover:not(:focus) {
-      border-color: var(--bolt-elements-borderColorHover);
+      border-color: var(--ah-border-color-hover);
     }
   }
 }
@@ -58,5 +70,25 @@
   display: flex;
   justify-content: flex-end;
   padding-top: 1rem;
-  border-top: 1px solid var(--bolt-elements-borderColor);
+  border-top: 1px solid var(--ah-border-color);
+  background: var(--ah-dialog-background);
+
+  button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background: var(--ah-primary);
+    color: var(--ah-text-on-primary);
+    border: none;
+
+    &:hover {
+      background: var(--ah-primary-hover);
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
 }

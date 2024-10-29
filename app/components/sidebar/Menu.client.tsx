@@ -105,14 +105,14 @@ export function Menu() {
       initial="closed"
       animate={open ? 'open' : 'closed'}
       variants={menuVariants}
-      className="flex flex-col side-menu fixed top-0 w-[350px] h-full bg-bolt-elements-background-depth-2 border-r rounded-r-3xl border-bolt-elements-borderColor z-sidebar shadow-xl shadow-bolt-elements-sidebar-dropdownShadow text-sm"
+      className="flex flex-col side-menu fixed top-0 w-[350px] h-full bg-[var(--ah-sidebar-background)] border-r rounded-r-3xl border-bolt-elements-borderColor z-sidebar shadow-xl shadow-[var(--ah-sidebar-shadow)] text-sm"
     >
       <div className="flex items-center h-[var(--header-height)]">{/* Placeholder */}</div>
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
         <div className="p-4">
           <a
             href="/"
-            className="flex gap-2 items-center bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
+            className="flex gap-2 items-center bg-[var(--ah-sidebar-button-background)] text-[var(--ah-sidebar-button-text)] hover:bg-[var(--ah-sidebar-button-hover)] rounded-md p-2 transition-theme"
           >
             <span className="inline-block i-bolt:chat scale-110" />
             Start new chat
@@ -124,7 +124,7 @@ export function Menu() {
           <DialogRoot open={dialogContent !== null}>
             {binDates(list).map(({ category, items }) => (
               <div key={category} className="mt-4 first:mt-0 space-y-1">
-                <div className="text-bolt-elements-textTertiary sticky top-0 z-1 bg-bolt-elements-background-depth-2 pl-2 pt-2 pb-1">
+                <div className="text-bolt-elements-textTertiary sticky top-0 z-1 bg-[var(--ah-sidebar-background)] pl-2 pt-2 pb-1">
                   {category}
                 </div>
                 {items.map((item) => (
@@ -144,7 +144,7 @@ export function Menu() {
                       <p className="mt-1">Are you sure you want to delete this chat?</p>
                     </div>
                   </DialogDescription>
-                  <div className="px-5 pb-4 bg-bolt-elements-background-depth-2 flex gap-2 justify-end">
+                  <div className="px-5 pb-4 bg-[var(--ah-sidebar-background)] flex gap-2 justify-end">
                     <DialogButton type="secondary" onClick={closeDialog}>
                       Cancel
                     </DialogButton>

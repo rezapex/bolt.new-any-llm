@@ -26,7 +26,10 @@ export function ApiKeySettings() {
 
   return (
     <div className={styles.container}>
-      <h3>API Keys</h3>
+      <h3>
+        <span className={`${styles.icon} i-ph:key-bold`} />
+        API Keys
+      </h3>
       <div className={styles.fields}>
         <div className={styles.field}>
           <label htmlFor="anthropic-key">Anthropic API Key</label>
@@ -90,12 +93,7 @@ export function ApiKeySettings() {
         </div>
       </div>
       <div className={styles.actions}>
-        <button
-          onClick={saveChanges}
-          className="bg-bolt-elements-primary text-bolt-elements-textOnPrimary hover:bg-bolt-elements-primary-hover px-4 py-2 rounded-md transition-colors"
-        >
-          Save Changes
-        </button>
+        <button onClick={saveChanges}>Save Changes</button>
       </div>
     </div>
   );

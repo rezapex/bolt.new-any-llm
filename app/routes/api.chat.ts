@@ -25,20 +25,20 @@ export async function action(args: ActionFunctionArgs) {
 }
 
 async function chatAction({ request }: ActionFunctionArgs) {
-  const { messages, apiKeys = {} } = await request.json<{
-    messages: Messages;
-    apiKeys?: {
-      anthropicApiKey?: string;
-      openaiApiKey?: string;
-      groqApiKey?: string;
-      openRouterApiKey?: string;
-      ollamaApiBaseUrl?: string;
-    };
-  }>();
-
-  const stream = new SwitchableStream();
-
   try {
+    const { messages, apiKeys = {} } = await request.json<{
+      messages: Messages;
+      apiKeys?: {
+        anthropicApiKey?: string;
+        openaiApiKey?: string;
+        groqApiKey?: string;
+        openRouterApiKey?: string;
+        ollamaApiBaseUrl?: string;
+      };
+    }>();
+
+    const stream = new SwitchableStream();
+
     const env: Env = {
       ANTHROPIC_API_KEY: apiKeys.anthropicApiKey || process.env.ANTHROPIC_API_KEY || '',
       OPENAI_API_KEY: apiKeys.openaiApiKey || process.env.OPENAI_API_KEY || '',
@@ -51,7 +51,6 @@ async function chatAction({ request }: ActionFunctionArgs) {
       if (key === 'OLLAMA_API_BASE_URL') {
         return false;
       }
-
       return value && value.trim() !== '';
     });
 
@@ -90,32 +89,50 @@ async function chatAction({ request }: ActionFunctionArgs) {
         messages.push({ role: 'assistant', content });
         messages.push({ role: 'user', content: CONTINUE_PROMPT });
 
-        const result = await streamText(messages, env, options);
-
-        return stream.switchSource(result.toAIStream());
+        try {
+          const result = await streamText(messages, env, options);
+          return stream.switchSource(result.toAIStream());
+        } catch (error) {
+          console.error('Error in stream continuation:', error);
+          throw error;
+        }
       },
     };
 
-    const result = await streamText(messages, env, options);
-    stream.switchSource(result.toAIStream());
+    try {
+      const result = await streamText(messages, env, options);
+      stream.switchSource(result.toAIStream());
 
-    return new Response(stream.readable, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache, no-transform',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    });
+      return new Response(stream.readable, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache, no-transform',
+          'Connection': 'keep-alive',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        },
+      });
+    } catch (error) {
+      console.error('Error in initial stream:', error);
+      throw error;
+    }
   } catch (error) {
     console.error('Chat error:', error);
 
+    let errorMessage = 'An error occurred while processing your request.';
+    let errorDetails = 'Unknown error occurred';
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = error.stack || 'No stack trace available';
+    }
+
     return new Response(
       JSON.stringify({
-        error: 'An error occurred while processing your request. Please check your API keys and try again.',
-        details: error instanceof Error ? error.message : 'Unknown error occurred',
+        error: errorMessage,
+        details: errorDetails,
       }),
       {
         status: 500,
