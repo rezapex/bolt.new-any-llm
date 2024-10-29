@@ -2,6 +2,7 @@
   "version": 2,
   "buildCommand": "pnpm run vercel-build",
   "outputDirectory": "build/client",
+  "framework": "remix",
   "headers": [
     {
       "source": "/(.*)",
