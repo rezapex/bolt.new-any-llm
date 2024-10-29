@@ -1,5 +1,7 @@
-// @ts-nocheck
-// Preventing TS checks with files presented in the video for a better presentation.
+/*
+ * @ts-nocheck
+ * Preventing TS checks with files presented in the video for a better presentation.
+ */
 import { type ActionFunctionArgs } from '@remix-run/cloudflare';
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '~/lib/.server/llm/constants';
 import { CONTINUE_PROMPT } from '~/lib/.server/llm/prompts';
@@ -16,6 +18,15 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
   const stream = new SwitchableStream();
 
   try {
+    // Create a Vercel-compatible environment object
+    const env = {
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+      GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+      GROQ_API_KEY: process.env.GROQ_API_KEY,
+      OPEN_ROUTER_API_KEY: process.env.OPEN_ROUTER_API_KEY,
+    };
+
     const options: StreamingOptions = {
       toolChoice: 'none',
       onFinish: async ({ text: content, finishReason }) => {
@@ -34,13 +45,13 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         messages.push({ role: 'assistant', content });
         messages.push({ role: 'user', content: CONTINUE_PROMPT });
 
-        const result = await streamText(messages, context.cloudflare.env, options);
+        const result = await streamText(messages, env, options);
 
         return stream.switchSource(result.toAIStream());
       },
     };
 
-    const result = await streamText(messages, context.cloudflare.env, options);
+    const result = await streamText(messages, env, options);
 
     stream.switchSource(result.toAIStream());
 
@@ -51,7 +62,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
       },
     });
   } catch (error) {
-    console.log(error);
+    console.error('Chat error:', error);
 
     throw new Response(null, {
       status: 500,
