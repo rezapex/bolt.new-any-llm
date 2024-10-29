@@ -8,10 +8,11 @@ export function ApiKeySettings() {
   const apiKeys = useStore(apiKeysStore);
 
   const updateApiKey = useCallback((key: keyof typeof apiKeys, value: string) => {
-    try {
-      apiKeysStore.setKey(key, value.trim());
+    const trimmedValue = value.trim();
 
-      if (value.trim()) {
+    try {
+      apiKeysStore.setKey(key, trimmedValue);
+      if (trimmedValue) {
         toast.success(`${key} updated successfully`);
       }
     } catch (error) {

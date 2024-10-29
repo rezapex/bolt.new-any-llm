@@ -27,7 +27,6 @@ async function chatAction({ request }: ActionFunctionArgs) {
   const stream = new SwitchableStream();
 
   try {
-    // prioritize user-provided API keys over environment variables
     const env: Env = {
       ANTHROPIC_API_KEY: apiKeys.anthropicApiKey || process.env.ANTHROPIC_API_KEY || '',
       OPENAI_API_KEY: apiKeys.openaiApiKey || process.env.OPENAI_API_KEY || '',
@@ -36,12 +35,10 @@ async function chatAction({ request }: ActionFunctionArgs) {
       OLLAMA_API_BASE_URL: apiKeys.ollamaApiBaseUrl || process.env.OLLAMA_API_BASE_URL || 'http://localhost:11434',
     };
 
-    // validate that at least one API key is provided
     const hasValidKey = Object.entries(env).some(([key, value]) => {
       if (key === 'OLLAMA_API_BASE_URL') {
         return false;
       }
-
       return value && value.trim() !== '';
     });
 
@@ -49,11 +46,15 @@ async function chatAction({ request }: ActionFunctionArgs) {
       return new Response(
         JSON.stringify({
           error: 'No valid API key provided. Please provide at least one API key in the settings.',
+          details: 'At least one API key (Anthropic, OpenAI, Groq, or OpenRouter) is required to use the chat.',
         }),
         {
           status: 400,
           headers: {
             'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
           },
         },
       );
@@ -90,18 +91,26 @@ async function chatAction({ request }: ActionFunctionArgs) {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache, no-transform',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
       },
     });
   } catch (error) {
     console.error('Chat error:', error);
+    
     return new Response(
       JSON.stringify({
         error: 'An error occurred while processing your request. Please check your API keys and try again.',
+        details: error instanceof Error ? error.message : 'Unknown error occurred',
       }),
       {
         status: 500,
         headers: {
           'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
         },
       },
     );
