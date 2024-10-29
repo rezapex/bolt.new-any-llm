@@ -10,7 +10,7 @@ export function ApiKeySettings() {
   const updateApiKey = useCallback((key: keyof typeof apiKeys, value: string) => {
     try {
       apiKeysStore.setKey(key, value.trim());
-      // Only show success toast when adding a key, not when clearing it
+
       if (value.trim()) {
         toast.success(`${key} updated successfully`);
       }

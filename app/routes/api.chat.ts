@@ -38,8 +38,10 @@ async function chatAction({ request }: ActionFunctionArgs) {
 
     // validate that at least one API key is provided
     const hasValidKey = Object.entries(env).some(([key, value]) => {
-      // Skip Ollama URL validation as it's optional
-      if (key === 'OLLAMA_API_BASE_URL') return false;
+      if (key === 'OLLAMA_API_BASE_URL') {
+        return false;
+      }
+
       return value && value.trim() !== '';
     });
 
