@@ -1,7 +1,3 @@
-/*
- * @ts-nocheck
- * Preventing TS checks with files presented in the video for a better presentation.
- */
 import { type ActionFunctionArgs } from '@remix-run/cloudflare';
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '~/lib/.server/llm/constants';
 import { CONTINUE_PROMPT } from '~/lib/.server/llm/prompts';
@@ -12,19 +8,17 @@ export async function action(args: ActionFunctionArgs) {
   return chatAction(args);
 }
 
-async function chatAction({ context, request }: ActionFunctionArgs) {
+async function chatAction({ request }: ActionFunctionArgs) {
   const { messages } = await request.json<{ messages: Messages }>();
-
   const stream = new SwitchableStream();
 
   try {
-    // Create a Vercel-compatible environment object
-    const env = {
-      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-      OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-      GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-      GROQ_API_KEY: process.env.GROQ_API_KEY,
-      OPEN_ROUTER_API_KEY: process.env.OPEN_ROUTER_API_KEY,
+    const env: Env = {
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+      GROQ_API_KEY: process.env.GROQ_API_KEY || '',
+      OPEN_ROUTER_API_KEY: process.env.OPEN_ROUTER_API_KEY || '',
+      OLLAMA_API_BASE_URL: process.env.OLLAMA_API_BASE_URL || 'http://localhost:11434',
     };
 
     const options: StreamingOptions = {
@@ -39,7 +33,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
         }
 
         const switchesLeft = MAX_RESPONSE_SEGMENTS - stream.switches;
-
         console.log(`Reached max token limit (${MAX_TOKENS}): Continuing message (${switchesLeft} switches left)`);
 
         messages.push({ role: 'assistant', content });
@@ -52,7 +45,6 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
     };
 
     const result = await streamText(messages, env, options);
-
     stream.switchSource(result.toAIStream());
 
     return new Response(stream.readable, {
