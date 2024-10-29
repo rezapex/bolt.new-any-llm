@@ -2,8 +2,8 @@ import { motion, type Variants } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
-import { IconButton } from '~/components/ui/IconButton';
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
+import { ApiKeySettings } from '~/components/settings/ApiKeySettings';
 import { db, deleteById, getAll, chatId, type ChatHistoryItem } from '~/lib/persistence';
 import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
@@ -31,7 +31,7 @@ const menuVariants = {
   },
 } satisfies Variants;
 
-type DialogContent = { type: 'delete'; item: ChatHistoryItem } | null;
+type DialogContent = { type: 'delete'; item: ChatHistoryItem } | { type: 'settings' } | null;
 
 export function Menu() {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -160,10 +160,23 @@ export function Menu() {
                   </div>
                 </>
               )}
+              {dialogContent?.type === 'settings' && (
+                <>
+                  <DialogTitle>API Settings</DialogTitle>
+                  <ApiKeySettings />
+                </>
+              )}
             </Dialog>
           </DialogRoot>
         </div>
-        <div className="flex items-center border-t border-bolt-elements-borderColor p-4">
+        <div className="flex items-center gap-4 border-t border-bolt-elements-borderColor p-4">
+          <button
+            onClick={() => setDialogContent({ type: 'settings' })}
+            className="flex items-center gap-2 text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary transition-colors"
+          >
+            <span className="i-ph:gear-six text-lg" />
+            API Keys
+          </button>
           <ThemeSwitch className="ml-auto" />
         </div>
       </div>

@@ -14,17 +14,42 @@ export async function action(args: ActionFunctionArgs) {
 }
 
 async function chatAction({ request }: ActionFunctionArgs) {
-  const { messages } = await request.json<{ messages: Messages }>();
+  const { messages, apiKeys = {} } = await request.json<{
+    messages: Messages;
+    apiKeys?: {
+      anthropicApiKey?: string;
+      openaiApiKey?: string;
+      groqApiKey?: string;
+      openRouterApiKey?: string;
+      ollamaApiBaseUrl?: string;
+    };
+  }>();
   const stream = new SwitchableStream();
 
   try {
+    // prioritize user-provided API keys over environment variables
     const env: Env = {
-      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? '',
-      OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? '',
-      GROQ_API_KEY: process.env.GROQ_API_KEY ?? '',
-      OPEN_ROUTER_API_KEY: process.env.OPEN_ROUTER_API_KEY ?? '',
-      OLLAMA_API_BASE_URL: process.env.OLLAMA_API_BASE_URL ?? 'http://localhost:11434',
+      ANTHROPIC_API_KEY: apiKeys.anthropicApiKey || process.env.ANTHROPIC_API_KEY || '',
+      OPENAI_API_KEY: apiKeys.openaiApiKey || process.env.OPENAI_API_KEY || '',
+      GROQ_API_KEY: apiKeys.groqApiKey || process.env.GROQ_API_KEY || '',
+      OPEN_ROUTER_API_KEY: apiKeys.openRouterApiKey || process.env.OPEN_ROUTER_API_KEY || '',
+      OLLAMA_API_BASE_URL: apiKeys.ollamaApiBaseUrl || process.env.OLLAMA_API_BASE_URL || 'http://localhost:11434',
     };
+
+    // validate that at least one API key is provided
+    const hasValidKey = Object.values(env).some((key) => key && key !== '');
+
+    if (!hasValidKey) {
+      return new Response(
+        JSON.stringify({ error: 'No valid API key provided. Please provide at least one API key.' }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+    }
 
     const options: StreamingOptions = {
       toolChoice: 'none',
@@ -61,10 +86,11 @@ async function chatAction({ request }: ActionFunctionArgs) {
     });
   } catch (error) {
     console.error('Chat error:', error);
-
-    return new Response(null, {
+    return new Response(JSON.stringify({ error: 'An error occurred while processing your request' }), {
       status: 500,
-      statusText: 'Internal Server Error',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
   }
 }
