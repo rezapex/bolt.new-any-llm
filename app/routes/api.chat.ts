@@ -4,6 +4,11 @@ import { CONTINUE_PROMPT } from '~/lib/.server/llm/prompts';
 import { streamText, type Messages, type StreamingOptions } from '~/lib/.server/llm/stream-text';
 import SwitchableStream from '~/lib/.server/llm/switchable-stream';
 
+export const config = {
+  runtime: 'edge',
+  regions: ['iad1'],
+};
+
 export async function action(args: ActionFunctionArgs) {
   return chatAction(args);
 }
@@ -14,11 +19,11 @@ async function chatAction({ request }: ActionFunctionArgs) {
 
   try {
     const env: Env = {
-      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
-      OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
-      GROQ_API_KEY: process.env.GROQ_API_KEY || '',
-      OPEN_ROUTER_API_KEY: process.env.OPEN_ROUTER_API_KEY || '',
-      OLLAMA_API_BASE_URL: process.env.OLLAMA_API_BASE_URL || 'http://localhost:11434',
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? '',
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? '',
+      GROQ_API_KEY: process.env.GROQ_API_KEY ?? '',
+      OPEN_ROUTER_API_KEY: process.env.OPEN_ROUTER_API_KEY ?? '',
+      OLLAMA_API_BASE_URL: process.env.OLLAMA_API_BASE_URL ?? 'http://localhost:11434',
     };
 
     const options: StreamingOptions = {
@@ -50,13 +55,14 @@ async function chatAction({ request }: ActionFunctionArgs) {
     return new Response(stream.readable, {
       status: 200,
       headers: {
-        contentType: 'text/plain; charset=utf-8',
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
       },
     });
   } catch (error) {
     console.error('Chat error:', error);
 
-    throw new Response(null, {
+    return new Response(null, {
       status: 500,
       statusText: 'Internal Server Error',
     });
