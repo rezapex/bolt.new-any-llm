@@ -10,6 +10,17 @@ export const config = {
 };
 
 export async function action(args: ActionFunctionArgs) {
+  if (args.request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
+  }
+
   return chatAction(args);
 }
 
@@ -24,6 +35,7 @@ async function chatAction({ request }: ActionFunctionArgs) {
       ollamaApiBaseUrl?: string;
     };
   }>();
+
   const stream = new SwitchableStream();
 
   try {
@@ -39,6 +51,7 @@ async function chatAction({ request }: ActionFunctionArgs) {
       if (key === 'OLLAMA_API_BASE_URL') {
         return false;
       }
+
       return value && value.trim() !== '';
     });
 
@@ -98,7 +111,7 @@ async function chatAction({ request }: ActionFunctionArgs) {
     });
   } catch (error) {
     console.error('Chat error:', error);
-    
+
     return new Response(
       JSON.stringify({
         error: 'An error occurred while processing your request. Please check your API keys and try again.',

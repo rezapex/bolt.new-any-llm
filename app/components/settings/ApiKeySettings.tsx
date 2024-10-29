@@ -1,25 +1,28 @@
 import { useStore } from '@nanostores/react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'react-toastify';
 import { apiKeysStore } from '~/lib/stores/api-keys';
 import styles from './ApiKeySettings.module.scss';
 
 export function ApiKeySettings() {
   const apiKeys = useStore(apiKeysStore);
+  const [localKeys, setLocalKeys] = useState(apiKeys);
 
-  const updateApiKey = useCallback((key: keyof typeof apiKeys, value: string) => {
-    const trimmedValue = value.trim();
+  const handleInputChange = (key: keyof typeof apiKeys, value: string) => {
+    setLocalKeys((prev) => ({ ...prev, [key]: value }));
+  };
 
+  const saveChanges = useCallback(() => {
     try {
-      apiKeysStore.setKey(key, trimmedValue);
-      if (trimmedValue) {
-        toast.success(`${key} updated successfully`);
-      }
+      Object.entries(localKeys).forEach(([key, value]) => {
+        apiKeysStore.setKey(key as keyof typeof apiKeys, (value || '').trim());
+      });
+      toast.success('API keys saved successfully');
     } catch (error) {
-      toast.error(`Failed to update ${key}`);
-      console.error('Error updating API key:', error);
+      toast.error('Failed to save API keys');
+      console.error('Error saving API keys:', error);
     }
-  }, []);
+  }, [localKeys]);
 
   return (
     <div className={styles.container}>
@@ -30,8 +33,8 @@ export function ApiKeySettings() {
           <input
             id="anthropic-key"
             type="password"
-            value={apiKeys.anthropicApiKey || ''}
-            onChange={(e) => updateApiKey('anthropicApiKey', e.target.value)}
+            value={localKeys.anthropicApiKey || ''}
+            onChange={(e) => handleInputChange('anthropicApiKey', e.target.value)}
             placeholder="Enter Anthropic API key"
             spellCheck={false}
             autoComplete="off"
@@ -42,8 +45,8 @@ export function ApiKeySettings() {
           <input
             id="openai-key"
             type="password"
-            value={apiKeys.openaiApiKey || ''}
-            onChange={(e) => updateApiKey('openaiApiKey', e.target.value)}
+            value={localKeys.openaiApiKey || ''}
+            onChange={(e) => handleInputChange('openaiApiKey', e.target.value)}
             placeholder="Enter OpenAI API key"
             spellCheck={false}
             autoComplete="off"
@@ -54,8 +57,8 @@ export function ApiKeySettings() {
           <input
             id="groq-key"
             type="password"
-            value={apiKeys.groqApiKey || ''}
-            onChange={(e) => updateApiKey('groqApiKey', e.target.value)}
+            value={localKeys.groqApiKey || ''}
+            onChange={(e) => handleInputChange('groqApiKey', e.target.value)}
             placeholder="Enter Groq API key"
             spellCheck={false}
             autoComplete="off"
@@ -66,8 +69,8 @@ export function ApiKeySettings() {
           <input
             id="openrouter-key"
             type="password"
-            value={apiKeys.openRouterApiKey || ''}
-            onChange={(e) => updateApiKey('openRouterApiKey', e.target.value)}
+            value={localKeys.openRouterApiKey || ''}
+            onChange={(e) => handleInputChange('openRouterApiKey', e.target.value)}
             placeholder="Enter OpenRouter API key"
             spellCheck={false}
             autoComplete="off"
@@ -78,13 +81,21 @@ export function ApiKeySettings() {
           <input
             id="ollama-url"
             type="text"
-            value={apiKeys.ollamaApiBaseUrl || ''}
-            onChange={(e) => updateApiKey('ollamaApiBaseUrl', e.target.value)}
+            value={localKeys.ollamaApiBaseUrl || ''}
+            onChange={(e) => handleInputChange('ollamaApiBaseUrl', e.target.value)}
             placeholder="Enter Ollama API base URL"
             spellCheck={false}
             autoComplete="off"
           />
         </div>
+      </div>
+      <div className={styles.actions}>
+        <button
+          onClick={saveChanges}
+          className="bg-bolt-elements-primary text-bolt-elements-textOnPrimary hover:bg-bolt-elements-primary-hover px-4 py-2 rounded-md transition-colors"
+        >
+          Save Changes
+        </button>
       </div>
     </div>
   );
